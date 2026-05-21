@@ -78,6 +78,19 @@ export async function POST(req: NextRequest) {
       const displayName
         = [user.first_name, user.last_name].filter(Boolean).join(' ').trim()
         || null;
+
+      // Defensive upsert of the org first — the organization.created webhook
+      // can race with this one. Clerk includes org details in the membership
+      // payload, so we have everything we need.
+      await db
+        .insert(organizationSchema)
+        .values({
+          id: m.organization.id,
+          name: m.organization.name,
+          timezone: 'UTC',
+        })
+        .onConflictDoNothing();
+
       await db
         .insert(memberSchema)
         .values({

@@ -33,6 +33,11 @@ export default function middleware(
     return NextResponse.next();
   }
 
+  // Dev-only debug endpoints (route handler itself guards on NODE_ENV).
+  if (request.nextUrl.pathname.startsWith('/api/debug/')) {
+    return NextResponse.next();
+  }
+
   if (
     request.nextUrl.pathname.includes('/sign-in')
     || request.nextUrl.pathname.includes('/sign-up')
