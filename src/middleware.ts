@@ -27,6 +27,17 @@ export default function middleware(
   request: NextRequest,
   event: NextFetchEvent,
 ) {
+  // Webhooks (Clerk, future tgm.bot) bypass auth and i18n entirely — they
+  // are verified by their own signature schemes inside the route handler.
+  if (request.nextUrl.pathname.startsWith('/api/webhooks/')) {
+    return NextResponse.next();
+  }
+
+  // Dev-only debug endpoints (route handler itself guards on NODE_ENV).
+  if (request.nextUrl.pathname.startsWith('/api/debug/')) {
+    return NextResponse.next();
+  }
+
   if (
     request.nextUrl.pathname.includes('/sign-in')
     || request.nextUrl.pathname.includes('/sign-up')
